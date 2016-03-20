@@ -10,7 +10,7 @@ if [ "$1" = 'postgres' ]; then
 	## start cron to run backups
 	if [ "$PGRES_BCKUP" = 'True' ]; then
 		echo "initializing sql backups" 
-		mkdir backup
+		#mkdir backup
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
