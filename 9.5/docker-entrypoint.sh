@@ -16,7 +16,7 @@ if [ "$1" = 'postgres' ]; then
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
-		echo "* * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y').sql" >> /etc/cron.d/sql-cron
+		echo "5 * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y').sql" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
@@ -107,14 +107,19 @@ if [ "$1" = 'postgres' ]; then
 		echo
 	fi
 
-	exec gosu postgres "$@"
-
 	if [ "$load_db" = 'True' ]; then
-		echo "restoring $(ls -tr backup/*.sql | tail -n 1)"
-		psql -f $(ls -tr backup/*.sql | tail -n 1) postgres
+		echo "sleep 60" > temp.go
+		echo "restoring $(ls -tr backup/*.sql | tail -n 1)" >> temp.go
+		echo "psql -f $(ls -tr backup/*.sql | tail -n 1) postgres" >> temp.go
+		echo "rm temp.go" >> temp.go
+		more temp.go
+		source temp.go &
 	else 
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
+
+	exec gosu postgres "$@"
+
 
 fi
 
