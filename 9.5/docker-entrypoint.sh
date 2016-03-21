@@ -16,12 +16,12 @@ if [ "$1" = 'postgres' ]; then
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
-		echo "5 * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y').sql" >> /etc/cron.d/sql-cron
+		echo "2 * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y').sql" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
 		touch backup/cron.log
-		ps -ef | grep cron
+		ps -ef | grep cron | grep -v grep >> backup/cron.log
 	fi
 
 	mkdir -p "$PGDATA"
@@ -108,12 +108,12 @@ if [ "$1" = 'postgres' ]; then
 	fi
 
 	if [ "$load_db" = 'True' ]; then
-		echo "sleep 60" > temp.go
-		echo "restoring $(ls -tr backup/*.sql | tail -n 1)" >> temp.go
-		echo "psql -f $(ls -tr backup/*.sql | tail -n 1) postgres" >> temp.go
-		echo "rm temp.go" >> temp.go
-		more temp.go
-		source temp.go &
+		echo "sleep 15" > backup/temp.go
+		echo "echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'" >> backup/temp.go
+		echo "psql -f $(ls -tr backup/*.sql | tail -n 1) postgres" >> backup/temp.go
+		echo "rm backup/temp.go" >> backup/temp.go
+		echo "Will restore $(ls -tr backup/*.sql | tail -n 1) in 15 seconds after postgres is running..."
+		source backup/temp.go &
 	else 
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
