@@ -107,6 +107,7 @@ if [ "$1" = 'postgres' ]; then
 		echo
 	fi
 
+	exec gosu postgres "$@"
 
 	if [ "$load_db" = 'True' ]; then
 		echo "restoring $(ls -tr backup/*.sql | tail -n 1)"
@@ -115,7 +116,6 @@ if [ "$1" = 'postgres' ]; then
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
 
-	exec gosu postgres "$@"
 fi
 
 exec "$@"
