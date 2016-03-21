@@ -7,6 +7,8 @@ set_listen_addresses() {
 }
 
 if [ "$1" = 'postgres' ]; then
+
+
 	## start cron to run backups
 	if [ "$PGRES_BCKUP" = 'True' ]; then
 		echo "initializing sql backups" 
@@ -107,5 +109,9 @@ if [ "$1" = 'postgres' ]; then
 	exec gosu postgres "$@"
 fi
 
+if [ "$load_db" = 'True' ]; then
+	echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'
+	psql -f (ls -tr backup/*.sql | tail -n 1) postgres
+fi
 exec "$@"
 
