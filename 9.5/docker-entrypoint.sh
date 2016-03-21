@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -
 
 set_listen_addresses() {
 	sedEscapedValue="$(echo "$1" | sed 's/[\/&]/\\&/g')"
@@ -12,11 +12,10 @@ if [ "$1" = 'postgres' ]; then
 	## start cron to run backups
 	if [ "$PGRES_BCKUP" = 'True' ]; then
 		echo "initializing sql backups" 
-		#mkdir backup
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
-		echo "2 * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y').sql" >> /etc/cron.d/sql-cron
+		echo "* * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y'-\%H).sql" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
@@ -108,12 +107,12 @@ if [ "$1" = 'postgres' ]; then
 	fi
 
 	if [ "$load_db" = 'True' ]; then
-		echo "sleep 15" > temp.go
-		echo "echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'" >> temp.go
-		echo "psql -f $(ls -tr backup/*.sql | tail -n 1) postgres" >> temp.go
-		echo "rm backup/temp.go" >> temp.go
+		echo "sleep 15" > temp.sh
+		echo "echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'" >> temp.sh
+		echo 'exec gosu postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)' >> temp.sh
+		echo "exec gosu root rm temp.sh" >> temp.sh
 		echo "Will restore $(ls -tr backup/*.sql | tail -n 1) in 15 seconds after postgres is running..."
-		source temp.go &
+		source temp.sh &
 	else 
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
