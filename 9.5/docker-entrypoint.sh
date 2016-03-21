@@ -106,12 +106,17 @@ if [ "$1" = 'postgres' ]; then
 		echo 'PostgreSQL init process complete; ready for start up.'
 		echo
 	fi
+
+
+	if [ "$load_db" = 'True' ]; then
+		echo "restoring $(ls -tr backup/*.sql | tail -n 1)"
+		psql -f (ls -tr backup/*.sql | tail -n 1) postgres
+	else 
+		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
+	fi
+
 	exec gosu postgres "$@"
 fi
 
-if [ "$load_db" = 'True' ]; then
-	echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'
-	psql -f (ls -tr backup/*.sql | tail -n 1) postgres
-fi
 exec "$@"
 
