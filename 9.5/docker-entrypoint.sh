@@ -108,12 +108,12 @@ if [ "$1" = 'postgres' ]; then
 	fi
 
 	if [ "$load_db" = 'True' ]; then
-		echo "sleep 15" > backup/temp.go
-		echo "echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'" >> backup/temp.go
-		echo "psql -f $(ls -tr backup/*.sql | tail -n 1) postgres" >> backup/temp.go
-		echo "rm backup/temp.go" >> backup/temp.go
+		echo "sleep 15" > temp.go
+		echo "echo 'restoring $(ls -tr backup/*.sql | tail -n 1)'" >> temp.go
+		echo "psql -f $(ls -tr backup/*.sql | tail -n 1) postgres" >> temp.go
+		echo "rm backup/temp.go" >> temp.go
 		echo "Will restore $(ls -tr backup/*.sql | tail -n 1) in 15 seconds after postgres is running..."
-		source backup/temp.go &
+		source temp.go &
 	else 
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
