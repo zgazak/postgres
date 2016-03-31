@@ -11,11 +11,12 @@ if [ "$1" = 'postgres' ]; then
 	## start cron to run backups
 	if [ "$PGRES_BCKUP" = 'True' ]; then
 		touch backup/backup.log
-		echo "$(date '+%m-%W-%y %H:%M:%S')   initializing sql backups" >> backup/backup.log
+		echo "###### new session" >> backup/backup.log
+		echo "$(date '+%y-%m-%d %H:%M:%S')   initializing sql backups" >> backup/backup.log
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
-		echo "* * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%m\%W\%y'-\%H).sql" >> /etc/cron.d/sql-cron
+		echo "* * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%y\%m\%d'-\%H).sql" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
@@ -105,12 +106,16 @@ if [ "$1" = 'postgres' ]; then
 	fi
 
 	if [ "$load_db" = 'True' ]; then
-		echo "sleep 15" > temp.sh
-		echo "echo '$(date '+%m-%W-%y %H:%M:%S')   restoring $(ls -tr backup/*.sql | tail -n 1)' >> backup/backup.log" >> temp.sh
-		echo 'exec gosu postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)' >> temp.sh
-		echo "exec gosu root rm temp.sh" >> temp.sh
-		echo "$(date '+%m-%W-%y %H:%M:%S')   Will restore $(ls -tr backup/*.sql | tail -n 1) in 15 seconds after postgres is running..." >> backup/backup.log
-		source temp.sh &
+		if [ -n "$(ls -tr /backup/*.sql | tail -n 1)" ]; then
+			echo "sleep 15" > temp.sh
+			echo "echo $(date '+%y-%m-%d %H:%M:%S')    restoring $(ls -tr backup/*.sql | tail -n 1) >> backup/backup.log" >> temp.sh
+			echo 'exec gosu postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)' >> temp.sh
+			echo "exec gosu root rm temp.sh" >> temp.sh
+			echo "$(date '+%y-%m-%d %H:%M:%S')   Will restore $(ls -tr backup/*.sql | tail -n 1) in 15 seconds after postgres is running..." >> backup/backup.log
+			source temp.sh &
+		else
+			echo "$(date '+%y-%m-%d %H:%M:%S')   no suitable .sql backup found -- starting with clean postgres platform" >> backup/backup.log
+		fi
 	else 
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
