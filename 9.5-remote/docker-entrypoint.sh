@@ -28,8 +28,8 @@ if [ "$1" = 'postgres' ]; then
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
-		echo "2 * * * * root echo $(ls -tr /backup/*.sql | tail -n 1) >> backup/backup.log" >> /etc/cron.d/sql-cron
-		echo "2 * * * * root gosu postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)" >> /etc/cron.d/sql-cron
+		echo "2 * * * * echo $(ls -tr /backup/*.sql | tail -n 1) >> backup/backup.log" >> /etc/cron.d/sql-cron
+		echo "2 * * * * exec gosu postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
