@@ -29,7 +29,7 @@ if [ "$1" = 'postgres' ]; then
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
 		echo "* * * * * root echo $(date '+%y-%m-%d %H:%M:%S') attempting to restore $(ls -tr /backup/*.sql | tail -n 1) >> backup/backup.log" >> /etc/cron.d/sql-cron
-		echo "* * * * * root exec gosu postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)" >> /etc/cron.d/sql-cron
+		echo "* * * * * root /usr/lib/postgresql/9.5/bin/postgres psql -f $(ls -tr /backup/*.sql | tail -n 1)" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
