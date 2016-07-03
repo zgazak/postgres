@@ -16,7 +16,7 @@ if [ "$1" = 'postgres' ]; then
 		echo "SHELL=/bin/bash" > /etc/cron.d/sql-cron
 		echo "PATH=/sbin:/bin:/usr/sbin:/usr/bin" >> /etc/cron.d/sql-cron
 		echo "HOME=/" >> /etc/cron.d/sql-cron
-		echo "* * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%y\%m\%d'-\%H).sql" >> /etc/cron.d/sql-cron
+		echo "20 * * * * root pg_dumpall -h $PGRES_HOST -U $PGRES_USER > backup/${PGRES_DB}_bckup_\$(date '+\%y\%m\%d'-\%H).sql" >> /etc/cron.d/sql-cron
 		chmod 0644 /etc/cron.d/sql-cron
 		/usr/bin/crontab /etc/cron.d/sql-cron
 		cron
@@ -59,7 +59,7 @@ if [ "$1" = 'postgres' ]; then
 
 		{ echo; echo "host all all 0.0.0.0/0 $authMethod"; } >> "$PGDATA/pg_hba.conf"
 
-		# internal start of server in order to allow set-up using psql-client		
+		# internal start of server in order to allow set-up using psql-client
 		# does not listen on TCP/IP and waits until start finishes
 		gosu postgres pg_ctl -D "$PGDATA" \
 			-o "-c listen_addresses=''" \
@@ -116,7 +116,7 @@ if [ "$1" = 'postgres' ]; then
 		else
 			echo "$(date '+%y-%m-%d %H:%M:%S')   no suitable .sql backup found -- starting with clean postgres platform" >> backup/backup.log
 		fi
-	else 
+	else
 		echo "not restoring  $(ls -tr backup/*.sql | tail -n 1)"
 	fi
 
@@ -125,4 +125,3 @@ if [ "$1" = 'postgres' ]; then
 fi
 
 exec "$@"
-
